@@ -1,0 +1,201 @@
+openapi: 3.1.0
+info:
+  title: Phase 1 Market Dashboard API
+  version: 0.1.0
+  description: Market-data-only API for the Phase 1 crypto dashboard.
+servers:
+  - url: http://localhost:8000
+paths:
+  /api/health:
+    get:
+      summary: Read backend health and market-data mode
+      operationId: getHealth
+      responses:
+        "200":
+          description: Backend health state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /api/symbols:
+    get:
+      summary: List supported market symbols
+      operationId: listSymbols
+      responses:
+        "200":
+          description: Supported symbols
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [symbols]
+                properties:
+                  symbols:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MarketSymbol"
+  /api/markets/summary:
+    get:
+      summary: Read market tile summaries
+      operationId: getMarketSummaries
+      responses:
+        "200":
+          description: Current market summaries for all supported symbols
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [mode, summaries]
+                properties:
+                  mode:
+                    type: string
+                    const: market-data-only
+                  summaries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MarketSummary"
+  /api/candles:
+    get:
+      summary: Read recent candles for a supported symbol and interval
+      operationId: getCandles
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProductId"
+        - name: interval
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ChartInterval"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 350
+            default: 100
+      responses:
+        "200":
+          description: Candle snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CandleSnapshot"
+        "400":
+          description: Unsupported symbol or interval
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ProductId:
+      type: string
+      enum: [BTC-USD, ETH-USD, SOL-USD]
+    ChartInterval:
+      type: string
+      enum: [1m, 5m, 15m, 1h]
+    Freshness:
+      type: string
+      enum: [fresh, stale, reconnecting, offline]
+    HealthResponse:
+      type: object
+      required: [mode, backend_status, trading_enabled]
+      properties:
+        mode:
+          type: string
+          const: market-data-only
+        backend_status:
+          $ref: "#/components/schemas/Freshness"
+        trading_enabled:
+          type: boolean
+          const: false
+        generated_at:
+          type: string
+          format: date-time
+    MarketSymbol:
+      type: object
+      required: [product_id, base_currency, quote_currency, display_name, enabled]
+      properties:
+        product_id:
+          $ref: "#/components/schemas/ProductId"
+        base_currency:
+          type: string
+        quote_currency:
+          type: string
+          const: USD
+        display_name:
+          type: string
+        enabled:
+          type: boolean
+    MarketSummary:
+      type: object
+      required: [product_id, price, price_change_24h_percent, last_update_at, freshness]
+      properties:
+        product_id:
+          $ref: "#/components/schemas/ProductId"
+        price:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]+)?$"
+        price_change_24h_percent:
+          type: string
+        last_update_at:
+          type: string
+          format: date-time
+        freshness:
+          $ref: "#/components/schemas/Freshness"
+    Candle:
+      type: object
+      required: [product_id, interval, time, open, high, low, close, volume, complete, source]
+      properties:
+        product_id:
+          $ref: "#/components/schemas/ProductId"
+        interval:
+          $ref: "#/components/schemas/ChartInterval"
+        time:
+          type: integer
+          description: UNIX seconds for candle bucket start.
+        open:
+          type: string
+        high:
+          type: string
+        low:
+          type: string
+        close:
+          type: string
+        volume:
+          type: [string, "null"]
+        complete:
+          type: boolean
+        source:
+          type: string
+          enum: [historical, live, backfill]
+    CandleSnapshot:
+      type: object
+      required: [product_id, interval, freshness, history_status, candles]
+      properties:
+        product_id:
+          $ref: "#/components/schemas/ProductId"
+        interval:
+          $ref: "#/components/schemas/ChartInterval"
+        freshness:
+          $ref: "#/components/schemas/Freshness"
+        history_status:
+          type: string
+          enum: [complete, partial, unavailable]
+          description: Complete means at least 100 candles are present when market data is available.
+        candles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Candle"
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
