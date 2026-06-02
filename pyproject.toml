@@ -1,0 +1,10 @@
+[project]
+name = "ailabs-s1-cryptostrat"
+version = "0.1.0"
+description = "A real-time crypto trading dashboard built end-to-end with AI as a thinking partner."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false

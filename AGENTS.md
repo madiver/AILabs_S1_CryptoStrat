@@ -67,9 +67,9 @@ This file defines generic engineering guidance for coding agents working in this
 
 ## Project-Specific Notes
 
-- Tech stack: To be defined.
-- Dependency management and virtual environment setup: To be defined.
-- Common commands: To be defined.
+- Tech stack: TypeScript/Node.js and Python.
+- Dependency management and virtual environment setup: Use `npm` for Node.js dependencies and `uv` for Python. Run `npm install` to restore Node dependencies and `uv sync` to create or update `.venv`.
+- Common commands: `npm run typecheck`, `npm run check:node`, `uv run python --version`, `uv pip list`.
 - Architecture boundaries: To be defined.
 - Testing notes: To be defined.
 - Deployment/packaging notes: To be defined.
