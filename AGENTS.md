@@ -69,8 +69,13 @@ This file defines generic engineering guidance for coding agents working in this
 
 - Tech stack: TypeScript/Node.js and Python.
 - Dependency management and virtual environment setup: Use `npm` for Node.js dependencies and `uv` for Python. Run `npm install` to restore Node dependencies and `uv sync` to create or update `.venv`.
-- Common commands: `npm run typecheck`, `npm run check:node`, `uv run python --version`, `uv pip list`.
-- Architecture boundaries: To be defined.
-- Testing notes: To be defined.
-- Deployment/packaging notes: To be defined.
-- Known pitfalls: To be defined.
+- Common commands: `npm run typecheck`, `npm run check:node`, `uv run python --version`, `uv pip list`. Phase 1 implementation is expected to add `uv run pytest backend/tests`, `npm run test`, and `npm run test:e2e`.
+- Architecture boundaries: Keep market data, candle aggregation, strategy evaluation, risk gating, execution, persistence, and UI rendering separated. The Python backend owns Coinbase credentials, strategy, risk, orders, cancellations, balances, and fills. For Phase 1, FastAPI owns public Coinbase market-data ingestion and exposes REST/WebSocket state to a Vite + React TypeScript frontend using TradingView Lightweight Charts.
+- Testing notes: Use constitution-required validation for market data, candle construction, strategy logic, risk gates, execution state transitions, credentials, persistence, and chart rendering. Run `npm run typecheck` for TypeScript changes.
+- Deployment/packaging notes: Live trading must remain disabled by default and requires explicit configuration, visible UI mode state, risk controls, and an emergency stop.
+- Known pitfalls: Do not put Coinbase secrets in frontend code, browser storage, logs, screenshots, or generated artifacts. Treat stale market data, reconnects, timestamp alignment, and live execution as high-risk.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->

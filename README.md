@@ -10,7 +10,39 @@ The dashboard streams real-time market data from Coinbase via WebSocket, renders
 
 Every decision is captured as a markdown artifact in this repo. Six months from now, someone trying to understand why the code is shaped this way can trace every choice back to the conversation that produced it. That auditability is what separates this approach from prompt-and-pray.
 
-This README, the project structure, and the running code will all be built up live during the broadcast. Check back after the show for the full project tree and run instructions.
+This README, the project structure, and the running code are built up live during the broadcast.
+
+## Phase 1 run instructions
+
+Install dependencies:
+
+```bash
+npm install
+uv sync
+```
+
+Run the backend:
+
+```bash
+uv run uvicorn main:app --app-dir backend/src --reload --host 127.0.0.1 --port 8000
+```
+
+Run the frontend in another terminal:
+
+```bash
+npm run dev
+```
+
+Open the Vite URL, typically http://127.0.0.1:5173.
+
+Validate the build:
+
+```bash
+uv run pytest backend/tests
+npm run typecheck
+npm run test
+npm run test:e2e
+```
 
 ## About the show
 
